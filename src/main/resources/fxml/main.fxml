@@ -4,22 +4,39 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.neighbornotebook.controller.MainController"
-      spacing="10">
-    <padding>
-        <Insets top="10" right="10" bottom="10" left="10"/>
-    </padding>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.neighbornotebook.controller.MainController"
+            prefHeight="600.0" prefWidth="800.0">
     
-    <TextField fx:id="titleField" promptText="Заголовок заметки"/>
+    <top>
+        <ToolBar>
+            <Button text="Новая заметка" onAction="#handleNewNote"/>
+            <Button text="Сохранить" onAction="#handleSaveNote"/>
+            <Button text="Удалить" onAction="#handleDeleteNote"/>
+            <Separator orientation="VERTICAL"/>
+            <Button text="Выбрать хранилище" onAction="#handleSelectStorage"/>
+        </ToolBar>
+    </top>
     
-    <TextArea fx:id="contentArea" 
-              promptText="Содержание заметки"
-              VBox.vgrow="ALWAYS"/>
+    <left>
+        <VBox spacing="5" prefWidth="200">
+            <padding>
+                <Insets top="5" right="5" bottom="5" left="5"/>
+            </padding>
+            <TextField fx:id="searchField" promptText="Поиск..."/>
+            <ListView fx:id="noteListView" VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </left>
     
-    <Button text="Сохранить" 
-            onAction="#handleSaveNote"
-            maxWidth="Infinity"/>
+    <center>
+        <VBox spacing="5">
+            <padding>
+                <Insets top="5" right="5" bottom="5" left="5"/>
+            </padding>
+            <TextField fx:id="titleField" promptText="Заголовок"/>
+            <TextArea fx:id="contentArea" promptText="Содержание" VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </center>
     
-</VBox> 
+</BorderPane> 

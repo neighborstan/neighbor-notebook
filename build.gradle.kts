@@ -2,16 +2,14 @@ plugins {
 	id("java")
 	id("org.springframework.boot") version "3.2.1"
 	id("io.spring.dependency-management") version "1.1.4"
-	id("org.openjfx.javafxplugin") version "0.0.13"
+	id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
 group = "com.neighbornotebook"
 version = "0.0.1-SNAPSHOT"
 
 java {
-	toolchain {
-		languageVersion.set(JavaLanguageVersion.of(21))
-	}
+	sourceCompatibility = JavaVersion.VERSION_21
 }
 
 repositories {
@@ -29,24 +27,27 @@ configurations {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
-	implementation("ch.qos.logback:logback-classic")
-	implementation(platform("org.openjfx:javafx-bom:21.0.1"))
-	implementation("org.openjfx:javafx-controls")
-	implementation("org.openjfx:javafx-fxml")
-	implementation("org.openjfx:javafx-graphics")
-	implementation("org.openjfx:javafx-base")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("com.fasterxml.jackson.core:jackson-databind")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+	implementation("org.apache.commons:commons-lang3")
+	implementation("commons-io:commons-io:2.15.1")
+	implementation("org.slf4j:slf4j-api")
+	implementation("ch.qos.logback:logback-classic")
 	
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 	
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.junit.jupiter:junit-jupiter")
+	testImplementation("org.mockito:mockito-junit-jupiter")
+	testImplementation("org.testfx:testfx-core:4.0.17")
+	testImplementation("org.testfx:testfx-junit5:4.0.17")
 }
 
 javafx {
-	version = "21.0.1"
-	modules = listOf("javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.base")
+	version = "21"
+	modules = listOf("javafx.controls", "javafx.fxml")
 }
 
 tasks.withType<Test> {
