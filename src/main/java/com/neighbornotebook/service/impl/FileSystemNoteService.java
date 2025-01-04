@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -47,10 +48,14 @@ public class FileSystemNoteService implements NoteService {
     public Note createNote(String title, String content) {
         log.debug("Создание новой заметки с заголовком: {}", title);
         
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Заголовок заметки не может быть пустым");
+        }
+        
         Note note = new Note();
         note.setId(UUID.randomUUID().toString());
-        note.setTitle(title);
-        note.setContent(content);
+        note.setTitle(title.trim());
+        note.setContent(content != null ? content : "");
         note.setCreatedAt(LocalDateTime.now());
         note.setUpdatedAt(LocalDateTime.now());
         note.setFormat("plain");
@@ -67,7 +72,8 @@ public class FileSystemNoteService implements NoteService {
         
         try {
             if (Files.exists(notePath)) {
-                Note note = objectMapper.readValue(Files.readAllBytes(notePath), Note.class);
+                String content = Files.readString(notePath, StandardCharsets.UTF_8);
+                Note note = objectMapper.readValue(content, Note.class);
                 log.debug("Заметка найдена: {}", id);
                 return Optional.of(note);
             }
@@ -102,6 +108,10 @@ public class FileSystemNoteService implements NoteService {
     public Note updateNote(Note note) {
         log.debug("Обновление заметки: {}", note.getId());
         
+        if (note.getId() == null || note.getId().trim().isEmpty()) {
+            throw new IllegalArgumentException("ID заметки не может быть пустым");
+        }
+        
         // Проверяем существование заметки
         if (!Files.exists(storagePath.resolve(note.getId() + ".json"))) {
             throw new NoteNotFoundException(note.getId());
@@ -133,7 +143,8 @@ public class FileSystemNoteService implements NoteService {
         try {
             Path notePath = storagePath.resolve(note.getId() + ".json");
             String noteJson = objectMapper.writeValueAsString(note);
-            Files.write(notePath, noteJson.getBytes());
+            log.debug("Подготовлен JSON для сохранения: {}", noteJson);
+            Files.writeString(notePath, noteJson, StandardCharsets.UTF_8);
             log.debug("Заметка сохранена в файл: {}", notePath);
         } catch (IOException e) {
             String message = String.format("Ошибка при сохранении заметки %s", note.getId());
@@ -144,7 +155,8 @@ public class FileSystemNoteService implements NoteService {
 
     private Optional<Note> readNoteFromFile(Path path) {
         try {
-            return Optional.of(objectMapper.readValue(Files.readAllBytes(path), Note.class));
+            String content = Files.readString(path, StandardCharsets.UTF_8);
+            return Optional.of(objectMapper.readValue(content, Note.class));
         } catch (IOException e) {
             String message = String.format("Ошибка при чтении заметки из файла %s", path);
             log.error("{}: {}", message, e.getMessage());
