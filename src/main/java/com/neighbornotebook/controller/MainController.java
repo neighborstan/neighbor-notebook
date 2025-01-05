@@ -1,12 +1,16 @@
 package com.neighbornotebook.controller;
 
 import com.neighbornotebook.service.NoteService;
+import com.neighbornotebook.service.ThemeService;
 import com.neighbornotebook.config.StorageConfig;
+import com.neighbornotebook.component.CodeEditor;
 import com.neighbornotebook.exception.GlobalExceptionHandler;
 import com.neighbornotebook.model.Note;
 import com.neighbornotebook.model.NoteListItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -29,6 +33,7 @@ public class MainController {
     private final NoteService noteService;
     private final GlobalExceptionHandler exceptionHandler;
     private final StorageConfig storageConfig;
+    private final ThemeService themeService;
     
     /** Поле для поиска заметок */
     @FXML
@@ -42,12 +47,17 @@ public class MainController {
     @FXML
     private TextField titleField;
     
-    /** Поле для ввода содержимого заметки */
+    /** Контейнер для редактора */
     @FXML
-    private TextArea contentArea;
+    private VBox editorContainer;
+    
+    /** Кнопка переключения темы */
+    @FXML
+    private ToggleButton themeToggle;
     
     private final ObservableList<NoteListItem> noteItems = FXCollections.observableArrayList();
     private NoteListItem currentNote;
+    private CodeEditor codeEditor;
     
     /**
      * Создает новый экземпляр контроллера.
@@ -55,13 +65,16 @@ public class MainController {
      * @param noteService сервис для работы с заметками
      * @param exceptionHandler обработчик исключений
      * @param storageConfig конфигурация хранилища
+     * @param themeService сервис управления темами
      */
     public MainController(NoteService noteService, 
                          GlobalExceptionHandler exceptionHandler,
-                         StorageConfig storageConfig) {
+                         StorageConfig storageConfig,
+                         ThemeService themeService) {
         this.noteService = noteService;
         this.exceptionHandler = exceptionHandler;
         this.storageConfig = storageConfig;
+        this.themeService = themeService;
     }
     
     /**
@@ -72,6 +85,18 @@ public class MainController {
     public void initialize() {
         log.debug("Инициализация главного контроллера");
         
+        // Инициализируем редактор кода
+        codeEditor = new CodeEditor();
+        codeEditor.prefWidthProperty().bind(editorContainer.widthProperty());
+        codeEditor.prefHeightProperty().bind(editorContainer.heightProperty());
+        codeEditor.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        VBox.setVgrow(codeEditor, Priority.ALWAYS);
+        editorContainer.getChildren().add(codeEditor);
+        
+        // Устанавливаем начальную тему
+        themeToggle.setSelected(themeService.isDarkTheme());
+        updateEditorTheme();
+        
         noteListView.setItems(noteItems);
         noteListView.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> loadNote(newValue));
@@ -80,6 +105,24 @@ public class MainController {
                 (observable, oldValue, newValue) -> filterNotes(newValue));
         
         refreshNoteList();
+    }
+    
+    /**
+     * Обрабатывает переключение темы.
+     */
+    @FXML
+    public void handleToggleTheme() {
+        themeService.toggleTheme();
+        updateEditorTheme();
+    }
+    
+    /**
+     * Обновляет тему редактора в соответствии с текущей темой.
+     */
+    private void updateEditorTheme() {
+        if (codeEditor != null) {
+            codeEditor.updateTheme(themeService.isDarkTheme());
+        }
     }
     
     /**
@@ -139,7 +182,7 @@ public class MainController {
     public void handleSaveNote() {
         try {
             String title = titleField.getText();
-            String content = contentArea.getText();
+            String content = codeEditor.getText();
             
             if (currentNote == null) {
                 log.debug("Попытка сохранения новой заметки с заголовком: {}", title);
@@ -171,7 +214,7 @@ public class MainController {
                 
                 currentNote = item;
                 titleField.setText(note.getTitle());
-                contentArea.setText(note.getContent());
+                codeEditor.setText(note.getContent());
             } catch (Exception e) {
                 exceptionHandler.handleException(e);
             }
@@ -215,7 +258,7 @@ public class MainController {
      */
     private void clearFields() {
         titleField.clear();
-        contentArea.clear();
+        codeEditor.setText("");
         log.debug("Поля ввода очищены");
     }
 } 

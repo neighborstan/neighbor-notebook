@@ -14,15 +14,7 @@ java {
 
 repositories {
 	mavenCentral()
-}
-
-configurations {
-	compileOnly {
-		extendsFrom(configurations.annotationProcessor.get())
-	}
-	all {
-		exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
-	}
+	maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
 }
 
 dependencies {
@@ -34,6 +26,10 @@ dependencies {
 	implementation("commons-io:commons-io:2.15.1")
 	implementation("org.slf4j:slf4j-api")
 	implementation("ch.qos.logback:logback-classic")
+	
+	// RichTextFX для подсветки синтаксиса
+	implementation("org.fxmisc.richtext:richtextfx:0.11.2")
+	implementation("org.fxmisc.flowless:flowless:0.7.2")
 	
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")

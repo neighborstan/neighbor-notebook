@@ -7,8 +7,8 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.neighbornotebook.controller.MainController"
-            prefHeight="600.0" prefWidth="800.0">
-    
+            prefHeight="600.0" prefWidth="800.0"> <!-- Размеры окна -->
+
     <top>
         <ToolBar>
             <Button text="Новая заметка" onAction="#handleNewNote"/>
@@ -16,9 +16,11 @@
             <Button text="Удалить" onAction="#handleDeleteNote"/>
             <Separator orientation="VERTICAL"/>
             <Button text="Выбрать хранилище" onAction="#handleSelectStorage"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <ToggleButton fx:id="themeToggle" text="Сменить тему" onAction="#handleToggleTheme" styleClass="theme-toggle"/>
         </ToolBar>
     </top>
-    
+
     <left>
         <VBox spacing="5" prefWidth="200">
             <padding>
@@ -28,15 +30,15 @@
             <ListView fx:id="noteListView" VBox.vgrow="ALWAYS"/>
         </VBox>
     </left>
-    
+
     <center>
         <VBox spacing="5">
             <padding>
                 <Insets top="5" right="5" bottom="5" left="5"/>
             </padding>
             <TextField fx:id="titleField" promptText="Заголовок"/>
-            <TextArea fx:id="contentArea" promptText="Содержание" VBox.vgrow="ALWAYS"/>
+            <VBox fx:id="editorContainer" VBox.vgrow="ALWAYS"/>
         </VBox>
     </center>
-    
-</BorderPane> 
+
+</BorderPane>
